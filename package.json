@@ -1,0 +1,19 @@
+{
+  "name": "restaurant-platform",
+  "private": true,
+  "version": "0.1.0",
+  "description": "QR-based multi-restaurant smart ordering platform",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "test": "npm --prefix backend run test",
+    "build": "npm --prefix frontend run build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "mongodb": "^7.1.0"
+  }
+}

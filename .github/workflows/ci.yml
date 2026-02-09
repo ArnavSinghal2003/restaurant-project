@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        env:
+          NODE_ENV: test
+          PORT: 5001
+          FRONTEND_URL: http://localhost:5173
+          MONGODB_URI: mongodb://127.0.0.1:27017/restaurant_platform_test
+          JWT_SECRET: this_is_a_test_jwt_secret_12345
+          SESSION_TOKEN_SECRET: this_is_a_test_session_secret_67890
+          PAYMENT_PROVIDER: stripe
+        run: npm run test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
