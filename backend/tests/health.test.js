@@ -1,15 +1,17 @@
-import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
-import app from '../src/app.js';
+import { healthHandler } from '../src/routes/health.route.js';
+import { createMockResponse } from './helpers/mockResponse.js';
 
-describe('GET /api/health', () => {
-  it('responds with healthy payload shape', async () => {
-    const response = await request(app).get('/api/health');
+describe('healthHandler', () => {
+  it('responds with healthy payload shape', () => {
+    const res = createMockResponse();
+    healthHandler({}, res);
+    const jsonPayload = res.json.mock.calls[0][0];
 
-    expect(response.statusCode).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data).toHaveProperty('serverTime');
-    expect(response.body.data).toHaveProperty('database');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(jsonPayload.success).toBe(true);
+    expect(jsonPayload.data).toHaveProperty('serverTime');
+    expect(jsonPayload.data).toHaveProperty('database');
   });
 });

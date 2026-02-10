@@ -4,7 +4,7 @@ import { ok } from '../utils/apiResponse.js';
 
 const healthRouter = Router();
 
-healthRouter.get('/', (_req, res) => {
+export function healthHandler(_req, res) {
   const isDatabaseUp = mongoose.connection.readyState === 1;
 
   return ok(
@@ -16,6 +16,8 @@ healthRouter.get('/', (_req, res) => {
     },
     'Backend is healthy'
   );
-});
+}
+
+healthRouter.get('/', healthHandler);
 
 export default healthRouter;

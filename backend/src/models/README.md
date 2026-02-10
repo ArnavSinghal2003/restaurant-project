@@ -1,13 +1,14 @@
 # Models Folder
 
-Phase 0 keeps model implementation intentionally deferred.
-
-In this phase, model design lives in `docs/phase-0-data-models.md`.
-
-From Phase 1 onward, create one file per model in this folder:
+Phase 1 model implementation has started:
 - `Restaurant.js`
 - `Table.js`
 - `MenuItem.js`
+
+Current source of truth for planned models remains:
+- `docs/phase-0-data-models.md`
+
+Upcoming model files in later phases:
 - `Session.js`
 - `Order.js`
 - `Otp.js`
