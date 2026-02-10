@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import RestaurantPage from './pages/RestaurantPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
+import TableSessionPage from './pages/TableSessionPage.jsx';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <main className="content-shell">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/join/:qrToken" element={<TableSessionPage />} />
           <Route path="/r/:slug" element={<RestaurantPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

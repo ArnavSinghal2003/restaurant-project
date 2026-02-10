@@ -134,6 +134,11 @@ function AdminPage() {
     [restaurants, selectedRestaurantId]
   );
 
+  function getQrJoinLink(table) {
+    const origin = window.location.origin;
+    return `${origin}/join/${encodeURIComponent(table.qrToken)}`;
+  }
+
   useEffect(() => {
     loadRestaurants();
   }, []);
@@ -389,6 +394,24 @@ function AdminPage() {
     }
   }
 
+  async function handleCopyQrLink(table) {
+    const qrJoinLink = getQrJoinLink(table);
+
+    try {
+      await navigator.clipboard.writeText(qrJoinLink);
+      setStatusMessage(`Copied QR link for table ${table.tableNumber}`);
+      setErrorMessage('');
+    } catch {
+      setErrorMessage('Unable to copy link. Please copy it manually.');
+      setStatusMessage(qrJoinLink);
+    }
+  }
+
+  function handleOpenQrLink(table) {
+    const qrJoinLink = getQrJoinLink(table);
+    window.open(qrJoinLink, '_blank', 'noopener,noreferrer');
+  }
+
   async function handleToggleAvailability(item) {
     if (!selectedRestaurantId) return;
 
@@ -523,6 +546,8 @@ function AdminPage() {
             onEdit={handleEditTable}
             onDelete={handleDeleteTable}
             onToggleActive={handleToggleTableActive}
+            onCopyQrLink={handleCopyQrLink}
+            onOpenQrLink={handleOpenQrLink}
             pendingTableId={pendingTableId}
           />
         )}

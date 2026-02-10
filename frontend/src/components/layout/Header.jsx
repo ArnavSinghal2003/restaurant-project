@@ -11,6 +11,7 @@ function Header() {
 
         <nav className="nav-links" aria-label="Main navigation">
           <Link to="/">Overview</Link>
+          <Link to="/join/demo-token">QR Join Demo</Link>
           <Link to="/r/demo-restaurant">Restaurant View</Link>
           <Link to="/admin">Admin View</Link>
         </nav>

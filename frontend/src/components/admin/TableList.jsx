@@ -1,4 +1,12 @@
-function TableList({ tables, onEdit, onDelete, onToggleActive, pendingTableId }) {
+function TableList({
+  tables,
+  onEdit,
+  onDelete,
+  onToggleActive,
+  onCopyQrLink,
+  onOpenQrLink,
+  pendingTableId
+}) {
   return (
     <section className="admin-panel">
       <header className="admin-panel-header">
@@ -28,6 +36,20 @@ function TableList({ tables, onEdit, onDelete, onToggleActive, pendingTableId })
                 <div className="menu-actions">
                   <button className="btn btn-soft" onClick={() => onEdit(table)} disabled={isPending}>
                     Edit
+                  </button>
+                  <button
+                    className="btn btn-soft"
+                    onClick={() => onCopyQrLink(table)}
+                    disabled={isPending}
+                  >
+                    Copy QR Link
+                  </button>
+                  <button
+                    className="btn btn-soft"
+                    onClick={() => onOpenQrLink(table)}
+                    disabled={isPending}
+                  >
+                    Open Link
                   </button>
                   <button
                     className="btn btn-soft"

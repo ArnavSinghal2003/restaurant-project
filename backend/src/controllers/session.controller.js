@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
 import { env } from '../config/env.js';
+import Restaurant from '../models/Restaurant.js';
 import Session from '../models/Session.js';
 import Table from '../models/Table.js';
 import { created, fail, ok } from '../utils/apiResponse.js';
@@ -54,6 +55,13 @@ export async function createOrJoinSession(req, res) {
     return fail(res, 404, 'Table not found for provided QR token');
   }
 
+  const restaurant = await Restaurant.findById(table.restaurantId).select(
+    'name slug currency isActive'
+  );
+  if (!restaurant) {
+    return fail(res, 404, 'Restaurant not found for this table');
+  }
+
   const existingSession = await Session.findOne({
     restaurantId: table.restaurantId,
     tableId: table._id,
@@ -69,6 +77,7 @@ export async function createOrJoinSession(req, res) {
       res,
       {
         session: existingSession,
+        restaurant,
         table: {
           _id: table._id,
           tableNumber: table.tableNumber
@@ -95,12 +104,13 @@ export async function createOrJoinSession(req, res) {
 
   return created(
     res,
-    {
-      session,
-      table: {
-        _id: table._id,
-        tableNumber: table.tableNumber
-      },
+      {
+        session,
+        restaurant,
+        table: {
+          _id: table._id,
+          tableNumber: table.tableNumber
+        },
       restaurantId: table.restaurantId,
       isNew: true
     },
@@ -117,12 +127,16 @@ export async function getSessionByToken(req, res) {
   await session.save();
 
   const table = await Table.findById(session.tableId).select('tableNumber qrToken isActive');
+  const restaurant = await Restaurant.findById(session.restaurantId).select(
+    'name slug currency isActive'
+  );
 
   return ok(
     res,
     {
       session,
-      table
+      table,
+      restaurant
     },
     'Session fetched'
   );

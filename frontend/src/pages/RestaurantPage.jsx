@@ -1,17 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { getRestaurantBySlug } from '../services/restaurant.service';
 import { listMenuItems } from '../services/menuItem.service';
+import { getSessionByToken, updateSessionMode } from '../services/session.service';
+import {
+  clearActiveSession,
+  getActiveSession,
+  saveActiveSession
+} from '../services/sessionStorage.service';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 function RestaurantPage() {
   const { slug } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sessionTokenFromQuery = searchParams.get('sessionToken');
   const [restaurant, setRestaurant] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [reloadSeed, setReloadSeed] = useState(0);
+  const [sessionContext, setSessionContext] = useState(null);
+  const [sessionMessage, setSessionMessage] = useState('');
+  const [isUpdatingMode, setIsUpdatingMode] = useState(false);
 
   usePageTitle(restaurant ? `${restaurant.name} | TableFlow` : 'Restaurant | TableFlow');
 
@@ -28,8 +39,52 @@ function RestaurantPage() {
 
         if (ignore) return;
 
+        let resolvedSessionContext = null;
+        let tokenToUse = sessionTokenFromQuery;
+
+        if (!tokenToUse) {
+          const savedSession = getActiveSession();
+          if (savedSession?.sessionToken && savedSession?.restaurant?.slug === slug) {
+            tokenToUse = savedSession.sessionToken;
+          }
+        }
+
+        if (tokenToUse) {
+          try {
+            const sessionData = await getSessionByToken(tokenToUse);
+            if (
+              sessionData?.restaurant?.slug &&
+              sessionData.restaurant.slug.toLowerCase() === restaurantData.slug.toLowerCase()
+            ) {
+              resolvedSessionContext = {
+                sessionToken: sessionData.session.sessionToken,
+                mode: sessionData.session.mode,
+                table: sessionData.table,
+                restaurant: sessionData.restaurant
+              };
+
+              saveActiveSession({
+                sessionToken: sessionData.session.sessionToken,
+                qrToken: sessionData.table?.qrToken || '',
+                mode: sessionData.session.mode,
+                restaurant: sessionData.restaurant,
+                table: sessionData.table
+              });
+
+              if (!sessionTokenFromQuery) {
+                setSearchParams({ sessionToken: sessionData.session.sessionToken }, { replace: true });
+              }
+            } else {
+              clearActiveSession();
+            }
+          } catch {
+            clearActiveSession();
+          }
+        }
+
         setRestaurant(restaurantData);
         setMenuItems(menuData.items || []);
+        setSessionContext(resolvedSessionContext);
       } catch (error) {
         if (ignore) return;
         setErrorMessage(error?.response?.data?.message || 'Failed to load restaurant menu.');
@@ -45,7 +100,7 @@ function RestaurantPage() {
     return () => {
       ignore = true;
     };
-  }, [slug, reloadSeed]);
+  }, [slug, reloadSeed, sessionTokenFromQuery, setSearchParams]);
 
   const categorizedMenu = useMemo(() => {
     return menuItems.reduce((groups, item) => {
@@ -81,6 +136,42 @@ function RestaurantPage() {
     );
   }
 
+  async function handleModeChange(nextMode) {
+    if (!sessionContext || isUpdatingMode || sessionContext.mode === nextMode) return;
+
+    setIsUpdatingMode(true);
+    setSessionMessage('');
+    setErrorMessage('');
+
+    try {
+      const response = await updateSessionMode(sessionContext.sessionToken, nextMode);
+      const updatedContext = {
+        ...sessionContext,
+        mode: response.mode
+      };
+      setSessionContext(updatedContext);
+      saveActiveSession({
+        sessionToken: updatedContext.sessionToken,
+        qrToken: sessionContext.table?.qrToken || '',
+        mode: updatedContext.mode,
+        restaurant: sessionContext.restaurant,
+        table: sessionContext.table
+      });
+      setSessionMessage(`Ordering mode updated to ${response.mode}.`);
+    } catch (error) {
+      setErrorMessage(error?.response?.data?.message || 'Failed to update session mode.');
+    } finally {
+      setIsUpdatingMode(false);
+    }
+  }
+
+  function handleLeaveSession() {
+    clearActiveSession();
+    setSessionContext(null);
+    setSessionMessage('Session removed from this browser. You can still browse the menu.');
+    setSearchParams({}, { replace: true });
+  }
+
   return (
     <div className="restaurant-page page-shell">
       <section className="container restaurant-hero">
@@ -96,6 +187,36 @@ function RestaurantPage() {
           <span className="pill">{restaurant.isActive ? 'Active' : 'Inactive'}</span>
         </div>
       </section>
+
+      {sessionContext ? (
+        <section className="container session-context-card">
+          <h2>Active Table Session</h2>
+          <p className="muted-text">
+            Table {sessionContext.table?.tableNumber || '-'} | Session token:{' '}
+            <code>{sessionContext.sessionToken}</code>
+          </p>
+          <div className="session-mode-actions">
+            <button
+              className={`btn ${sessionContext.mode === 'collective' ? 'btn-accent' : 'btn-soft'}`}
+              onClick={() => handleModeChange('collective')}
+              disabled={isUpdatingMode}
+            >
+              Collective Mode
+            </button>
+            <button
+              className={`btn ${sessionContext.mode === 'individual' ? 'btn-accent' : 'btn-soft'}`}
+              onClick={() => handleModeChange('individual')}
+              disabled={isUpdatingMode}
+            >
+              Individual Mode
+            </button>
+            <button className="btn btn-soft" onClick={handleLeaveSession}>
+              Leave Session
+            </button>
+          </div>
+          {sessionMessage ? <p className="success-text">{sessionMessage}</p> : null}
+        </section>
+      ) : null}
 
       <section className="container menu-category-wrap">
         {Object.keys(categorizedMenu).length === 0 ? (

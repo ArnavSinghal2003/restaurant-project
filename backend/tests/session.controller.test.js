@@ -7,6 +7,12 @@ vi.mock('../src/models/Table.js', () => ({
   }
 }));
 
+vi.mock('../src/models/Restaurant.js', () => ({
+  default: {
+    findById: vi.fn()
+  }
+}));
+
 vi.mock('../src/models/Session.js', () => ({
   default: {
     exists: vi.fn(),
@@ -16,6 +22,7 @@ vi.mock('../src/models/Session.js', () => ({
 }));
 
 import Table from '../src/models/Table.js';
+import Restaurant from '../src/models/Restaurant.js';
 import Session from '../src/models/Session.js';
 import {
   addSessionParticipant,
@@ -59,6 +66,13 @@ describe('session controller', () => {
     };
 
     Table.findOne.mockResolvedValue(table);
+    Restaurant.findById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        _id: 'r1',
+        name: 'Spice Garden',
+        slug: 'spice-garden'
+      })
+    });
     const sort = vi.fn().mockResolvedValue(existingSession);
     Session.findOne.mockReturnValue({ sort });
 
@@ -81,6 +95,13 @@ describe('session controller', () => {
     };
 
     Table.findOne.mockResolvedValue(table);
+    Restaurant.findById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        _id: 'r1',
+        name: 'Spice Garden',
+        slug: 'spice-garden'
+      })
+    });
     const sort = vi.fn().mockResolvedValue(null);
     Session.findOne.mockReturnValue({ sort });
     Session.exists.mockResolvedValue(false);

@@ -315,6 +315,53 @@ h1 {
   margin-bottom: 1.1rem;
 }
 
+.session-page {
+  max-width: 760px;
+}
+
+.session-token-box {
+  margin: 1rem 0;
+  background: #f1f8f4;
+  border: 1px solid #d7eade;
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  color: #2f5548;
+  overflow-x: auto;
+}
+
+.session-token-box code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.session-form {
+  display: grid;
+  gap: 0.7rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.session-context-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.session-context-card code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.session-mode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .menu-category-wrap {
   display: grid;
   gap: 1rem;
