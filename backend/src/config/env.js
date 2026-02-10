@@ -8,6 +8,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(5000),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   MONGODB_URI: z.string().min(1),
+  SESSION_TTL_MINUTES: z.coerce.number().int().min(5).max(720).default(120),
   JWT_SECRET: z.string().min(16),
   SESSION_TOKEN_SECRET: z.string().min(16),
   EMAIL_FROM: z.string().email().optional(),

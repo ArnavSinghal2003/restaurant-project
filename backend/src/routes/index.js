@@ -3,6 +3,7 @@ import healthRouter from './health.route.js';
 import restaurantRouter from './restaurant.route.js';
 import tableRouter from './table.route.js';
 import menuItemRouter from './menuItem.route.js';
+import sessionRouter from './session.route.js';
 
 const router = Router();
 
@@ -10,6 +11,7 @@ router.use('/health', healthRouter);
 router.use('/v1/restaurants', restaurantRouter);
 router.use('/v1/restaurants/:restaurantId/tables', tableRouter);
 router.use('/v1/restaurants/:restaurantId/menu-items', menuItemRouter);
+router.use('/v1/sessions', sessionRouter);
 
 // Phase 1+ routes will be added here.
 router.get('/v1', (_req, res) => {
